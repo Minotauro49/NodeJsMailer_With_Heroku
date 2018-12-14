@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<title>Post</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="http://cdnjs.cloudflare.com/ajax/libs/jquery-ajaxtransport-xdomainrequest/1.0.3/jquery.xdomainrequest.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+
+	<form class="container">
+		<div class="form-group">
+		  <label for="usr">Name:</label>
+		  <input type="text" class="form-control" id="usr">
+		</div>
+	
+		<div class="form-group">
+		  <label for="eml">Email:</label>
+		  <input type="email" class="form-control" id="eml">
+		</div>
+	
+		<div class="form-group">
+		  <label for="msg">Message:</label>
+		  <textarea class="form-control" rows="10" id="msg"></textarea>
+		</div>
+		<div class="form-group">
+		<button class="form-control btn btn-primary" id="Submit">Submit</button>
+		</div>
+	</form>
+
+
+
+	<script type="text/javascript">
+		$(document).ready(function(){
+			var connection = false;
+			var checked = true;
+			var selfDistract = 0;
+			var stop = false;
+
+			if (stop == false) {
+				$("#Submit").click(function(e){
+					e.preventDefault();
+			
+					// Gether user infor and turns it to json format
+					function userData(userName,email,message) {	
+						let json = {"From":email,"Date":new Date().toString(),"Subject":userName,"Message":message}
+						return json
+					}
+					var jsonUser = userData($("#usr").val(),$("#eml").val(),$("#msg").val())
+			
+					var update = setInterval(function(){
+						// posts Email
+						if (connection == true && checked == true) {
+							$.post("http://localhost:8080/mailsender",jsonUser);
+							checked = false;
+							console.log("Posted")
+						}
+	
+	
+						$.ajax({
+						    xhrFields: {withCredentials: true},
+						    type: "GET",
+						    url: "http://localhost:8080/reponse",
+						    dataType: 'jsonp'
+						}).done(function (data) {
+							data = JSON.parse(data);
+	
+							if (connection == true && data.Status === "Ready") {
+								clearInterval(update);
+								console.log("Something went wrong")
+							}
+	
+							connection = true;
+							if (data.Status === "Failed" || data.Status === "Success") {
+								clearInterval(update);
+								console.log(data.Status)
+							}
+							
+						});
+	
+						if (selfDistract++ > 20) {
+							clearInterval(update);
+							console.log("Connection Too Slow")
+						}
+					},1500)
+			
+				})
+				stop = true;
+			}else{
+				console.log("Sendind Failed")
+			}
+		})
+
+	</script>
+
+</body>
+</html>
