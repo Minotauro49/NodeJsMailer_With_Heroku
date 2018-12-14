@@ -1,7 +1,6 @@
 # NodeJsMailer_With_Heroku
 # This a nodeJs script that sends me an email # Failed
 
-<hr>
 This script worked as intended. 
 
 Keep in mind this is a huge security risk as it requires your actual email and password.
